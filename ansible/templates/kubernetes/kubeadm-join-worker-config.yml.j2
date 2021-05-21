@@ -1,0 +1,14 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    token: {{ kube_join_token }}
+    caCertHashes:
+    - {{ kube_join_cert_hash }}
+    apiServerEndpoint: {{ kube_control_plane_endpoint }}
+    unsafeSkipCAVerification: false
+  timeout: 4m0s
+nodeRegistration:
+  name: {{ kube_join_name }}
+  criSocket: /var/run/dockershim.sock

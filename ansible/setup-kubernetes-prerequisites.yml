@@ -1,0 +1,47 @@
+---
+- name: Setup Kubernetes prerequisites on cluster nodes
+  hosts: kube_cluster
+  become: yes
+
+  tasks:
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+      notify: reboot_system
+
+    - name: Disable swap if currently used
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+      changed_when: true
+
+    - name: Remove and unmount swap partitions
+      mount:
+        path: '{{ item }}'
+        fstype: swap
+        state: absent
+      loop:
+        - swap
+        - none
+
+    - name: Setup required kernel modules
+      copy:
+        src: files/kubernetes/all/kernel-modules.conf
+        dest: /etc/modules-load.d/k8s.conf
+        mode: 0644
+      notify: reboot_system
+
+    - name: Setup required kernel params
+      copy:
+        src: files/kubernetes/all/kernel-params.conf
+        dest: /etc/sysctl.d/k8s.conf
+        mode: 0644
+      notify: reconfigure_kernel
+
+  handlers:
+    - name: Reboot system
+      reboot:
+      listen: reboot_system
+
+    - name: Reconfigure Linux kernel
+      command: sysctl --system
+      listen: reconfigure_kernel

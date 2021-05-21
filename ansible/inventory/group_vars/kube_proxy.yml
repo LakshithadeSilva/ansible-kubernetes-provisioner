@@ -1,0 +1,10 @@
+---
+envoy_version: v1.18-latest
+envoy_container_image: 'envoyproxy/envoy:{{ envoy_version }}'
+envoy_container_name: envoy
+
+envoy_config_directory: /etc/envoy
+envoy_config_file: '{{ envoy_config_directory }}/envoy-config.yaml'
+
+envoy_admin_port: 9901
+envoy_kube_control_plane_port: 6443

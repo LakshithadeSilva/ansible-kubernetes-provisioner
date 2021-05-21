@@ -1,0 +1,24 @@
+---
+- name: Join Kubernetes worker nodes
+  hosts: kube_workers
+  become: yes
+
+  tasks:
+    - name: Check if Kubernentes is already installed
+      stat:
+        path: '{{ kube_config_kublet }}'
+      register: kube_installation
+
+    - name: Join Kubenetes cluster as worker
+      block:
+        - name: Copy Kubernentes worker join config
+          template:
+            src: templates/kubernetes/kubeadm-join-worker-config.yml.j2
+            dest: ~/kubeadm-join-worker-config.ymlu
+            mode: 0644
+
+        - name: Join Kubernetes cluster as worker
+          command: >
+            kubeadm join --config ~/kubeadm-join-worker-config.yml
+          changed_when: false
+      when: not kube_installation.stat.exists

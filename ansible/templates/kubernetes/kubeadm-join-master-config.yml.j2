@@ -1,0 +1,18 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    token: {{ kube_join_token }}
+    caCertHashes:
+    - {{ kube_join_cert_hash }}
+    apiServerEndpoint: {{ kube_control_plane_endpoint }}
+    unsafeSkipCAVerification: false
+nodeRegistration:
+  name: {{ kube_join_name }}
+  criSocket: /var/run/dockershim.sock
+controlPlane:
+  localAPIEndpoint:
+    bindPort: {{ kube_local_apiserver_bind_port }}
+    advertiseAddress: {{ kube_local_apiserver_bind_address }}
+  certificateKey: {{ kube_join_upload_certs_key }}
