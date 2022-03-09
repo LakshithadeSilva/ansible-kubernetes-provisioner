@@ -4,10 +4,10 @@ all:
       children:
         kube_masters:
           children:
-            kube_masters_primary:
+            kube_primary_master:
               hosts:
                 kube-master1:
-            kube_masters_secondary:
+            kube_secondary_masters:
               hosts:
                 kube-master2:
 
@@ -21,6 +21,6 @@ all:
       hosts:
         kube-proxy:
 
-    kube_monitor:
+    docker_hosts:
       hosts:
-        kube-monitor:
+        kube-proxy:

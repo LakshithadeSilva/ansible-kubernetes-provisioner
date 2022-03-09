@@ -1,0 +1,10 @@
+---
+- import_playbook: install-dependencies.yaml
+- import_playbook: install-docker.yaml
+- import_playbook: install-envoy.yaml
+- import_playbook: install-kubernetes-prerequisites.yaml
+- import_playbook: install-kubernetes-packages.yaml
+- import_playbook: install-kubernetes-primary-master.yaml
+- import_playbook: install-kubernetes-secondary-masters.yaml
+- import_playbook: install-kubernetes-workers.yaml
+- import_playbook: install-kubernetes-addons.yaml

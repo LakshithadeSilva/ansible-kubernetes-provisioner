@@ -1,0 +1,55 @@
+---
+- name: Install Kubernetes on primary master node
+  hosts: kube_primary_master
+  become: yes
+
+  tasks:
+  - name: Check if Kubernentes is already installed
+    stat:
+      path: '{{ kube_config_kublet }}'
+    register: kube_installation
+
+  - name: Initialise Kubernetes cluster
+    block:
+    - name: Create Kubernetes certs directory
+      file:
+        path: '{{ kube_config_certs_directory }}'
+        mode: 0755
+        state: directory
+
+    - name: Copy root CA key
+      copy:
+        src: files/kubernetes/masters/ca.key
+        dest: '{{ kube_config_certs_directory }}'
+        mode: 0600
+
+    - name: Copy root CA cert
+      copy:
+        src: files/kubernetes/masters/ca.crt
+        dest: '{{ kube_config_certs_directory }}'
+        mode: 0644
+
+    - name: Copy Kubernentes init config
+      template:
+        src: templates/kubernetes/kubeadm/init-config.yaml.j2
+        dest: ~/kubeadm-init-config.yaml
+        mode: 0644
+
+    - name: Pull Kubernetes control plane container images
+      command: kubeadm config images pull --config ~/kubeadm-init-config.yaml
+      changed_when: true
+
+    - name: Bootstrap Kubernetes cluster
+      command: kubeadm init --skip-token-print --config ~/kubeadm-init-config.yaml
+      changed_when: true
+    when: not kube_installation.stat.exists
+
+  - name: Install Calico pod networking
+    kubernetes.core.k8s:
+      template: templates/kubernetes/addons/calico-pod-network.yaml.j2
+      kubeconfig: '{{ kube_config_admin }}'
+      state: present
+
+  - name: Configure Kubernetes access in user profiles
+    import_role:
+      name: configure-kubernetes-access

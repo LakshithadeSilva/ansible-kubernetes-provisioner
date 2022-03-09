@@ -1,0 +1,89 @@
+---
+- name: Setup system environment required for Kubernetes
+  hosts: kube_cluster
+  become: yes
+
+  tasks:
+  - name: Disable SELinux
+    selinux:
+      state: disabled
+    notify: reboot_system
+
+  - name: Disable swap if currently used
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+    changed_when: true
+
+  - name: Remove and unmount swap partitions
+    mount:
+      path: '{{ item }}'
+      fstype: swap
+      state: absent
+    loop:
+    - swap
+    - none
+
+  - name: Install required kernel modules
+    copy:
+      src: files/kubernetes/all/kernel-modules.conf
+      dest: /etc/modules-load.d/k8s.conf
+      mode: 0644
+    notify: reboot_system
+
+  - name: Configure required kernel params
+    copy:
+      src: files/kubernetes/all/kernel-params.conf
+      dest: /etc/sysctl.d/k8s.conf
+      mode: 0644
+    notify: reconfigure_kernel
+
+  handlers:
+  - name: Reboot system
+    reboot:
+    listen: reboot_system
+
+  - name: Reconfigure kernel
+    command: sysctl --system
+    listen: reconfigure_kernel
+
+- name: Install container runtime on Kubernetes nodes
+  hosts: kube_cluster
+  become: yes
+
+  tasks:
+  - name: Install containerd package repo
+    get_url:
+      url: '{{ containerd_package_repository }}'
+      dest: /etc/yum.repos.d/containerd-io.repo
+      mode: 0644
+
+  - name: Install containerd
+    dnf:
+      name: containerd.io-{{ containerd_version }}
+      state: present
+
+  - name: Create directory for containerd configuration
+    file:
+      path: /etc/containerd
+      state: directory
+      mode: 0700
+  
+  - name: Copy containerd configuration
+    template:
+      src: templates/kubernetes/containerd/config.toml.j2
+      dest: /etc/containerd/config.toml
+      mode: 0644
+    notify: restart_containerd
+
+  - name: Enable and start containerd daemon
+    systemd:
+      name: containerd
+      enabled: yes
+      state: started
+
+  handlers:
+  - name: Restart containerd daemon
+    systemd:
+      name: containerd
+      state: restarted
+    listen: restart_containerd

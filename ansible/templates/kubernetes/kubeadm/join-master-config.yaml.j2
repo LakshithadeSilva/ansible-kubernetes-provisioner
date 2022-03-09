@@ -1,5 +1,5 @@
 ---
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: JoinConfiguration
 discovery:
   bootstrapToken:
@@ -8,11 +8,16 @@ discovery:
     - {{ kube_join_cert_hash }}
     apiServerEndpoint: {{ kube_control_plane_endpoint }}
     unsafeSkipCAVerification: false
+  timeout: 4m0s
 nodeRegistration:
-  name: {{ kube_join_name }}
-  criSocket: /var/run/dockershim.sock
+  name: {{ kube_node_registered_name }}
+  criSocket: {{ kube_node_cri_socket }}
+  imagePullPolicy: Always
+  taints:
+  - key: node-role.kubernetes.io/master
+    effect: NoSchedule
 controlPlane:
   localAPIEndpoint:
-    bindPort: {{ kube_local_apiserver_bind_port }}
     advertiseAddress: {{ kube_local_apiserver_bind_address }}
-  certificateKey: {{ kube_join_upload_certs_key }}
+    bindPort: {{ kube_local_apiserver_bind_port }}
+  certificateKey: {{ kube_uploaded_certs_key }}

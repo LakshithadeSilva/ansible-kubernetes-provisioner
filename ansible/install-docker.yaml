@@ -1,0 +1,55 @@
+---
+- name: Install Docker
+  hosts: docker_hosts
+  become: yes
+
+  tasks:
+  - name: Install Docker CE package repo
+    get_url:
+      url: '{{ docker_package_repository }}'
+      dest: /etc/yum.repos.d/docker-ce.repo
+      mode: 0644
+
+  - name: Install Docker CE engine and CLI
+    dnf:
+      name:
+      - docker-ce-{{ docker_version }}
+      - docker-ce-cli-{{ docker_version }}
+      state: present
+
+  - name: Create directory for Docker daemon configuration
+    file:
+      path: /etc/docker
+      state: directory
+      mode: 0700
+
+  - name: Copy Docker deamon configuration settings
+    template:
+      src: templates/docker/daemon.json.j2
+      dest: /etc/docker/daemon.json
+      mode: 0644
+    notify: restart_docker
+
+  - name: Add user to the Docker group
+    user:
+      name: '{{ ansible_user }}'
+      groups: '{{ docker_group }}'
+      append: yes
+
+  - name: Enable Docker daemon and start service
+    systemd:
+      name: docker
+      enabled: yes
+      state: started
+
+  - name: Install Python Docker modules required by Ansible
+    pip:
+      name: '{{ python_docker_modules }}'
+      state: present
+
+  handlers:
+  - name: Restart Docker daemon
+    systemd:
+      name: docker
+      state: restarted
+    listen: restart_docker
