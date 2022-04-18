@@ -1,0 +1,11 @@
+---
+- name: Install Kubernetes addons through primary master
+  hosts: kube_primary_master
+  become: yes
+
+  tasks:
+  - name: Install Nginx ingress controller
+    kubernetes.core.k8s:
+      template: templates/kubernetes/addons/niginx-ingress-controller.yaml.j2
+      kubeconfig: '{{ kube_config_admin }}'
+      state: present

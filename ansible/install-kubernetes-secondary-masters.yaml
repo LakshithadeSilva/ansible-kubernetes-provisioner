@@ -1,0 +1,39 @@
+---
+- name: Upload certs through primary master
+  hosts: kube_primary_master
+  become: yes
+
+  tasks:
+  - name: Upload certs
+    command: kubeadm init phase upload-certs
+      --certificate-key {{ kube_uploaded_certs_key }}
+      --skip-certificate-key-print
+      --upload-certs 
+    changed_when: true
+
+- name: Join secondary master nodes
+  hosts: kube_secondary_masters
+  become: yes
+
+  tasks:
+  - name: Check if Kubernentes is already installed
+    stat:
+      path: '{{ kube_config_kublet }}'
+    register: kube_installation
+
+  - name: Join Kubenetes cluster as master
+    block:
+    - name: Copy Kubernentes master join config
+      template:
+        src: templates/kubernetes/kubeadm/join-master-config.yaml.j2
+        dest: ~/kubeadm-join-master-config.yaml
+        mode: 0644
+
+    - name: Join Kubernetes cluster as master
+      command: kubeadm join --config ~/kubeadm-join-master-config.yaml
+      changed_when: true
+    when: not kube_installation.stat.exists
+
+  - name: Configure Kubernetes access in user profiles
+    import_role:
+      name: configure-kubernetes-access

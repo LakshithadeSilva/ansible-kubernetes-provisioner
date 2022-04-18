@@ -1,0 +1,37 @@
+---
+- name: Install Kubernetes packages
+  hosts: kube_cluster
+  become: yes
+
+  tasks:
+  - name: Add Kubernetes repository
+    yum_repository:
+      name: kubernetes
+      description: Official Kubernetes
+      baseurl: '{{ kube_repo_uri }}'
+      gpgkey: '{{ kube_repo_gpgkeys }}'
+      repo_gpgcheck: yes
+      gpgcheck: yes
+      enabled: yes
+      exclude: kube*
+      state: present
+
+  - name: Install Kubernentes core components
+    dnf:
+      name:
+      - kubeadm-{{ kube_version }}
+      - kubelet-{{ kube_version }}
+      - kubectl-{{ kube_version }}
+      disable_excludes: kubernetes
+      state: present
+
+  - name: Enable kubelet and start service
+    systemd:
+      name: kubelet
+      enabled: yes
+      state: started
+
+  - name: Install Python Kubernetes modules required by Ansible
+    pip:
+      name: '{{ python_kubernetes_modules }}'
+      state: present

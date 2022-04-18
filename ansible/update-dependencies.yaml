@@ -1,0 +1,14 @@
+---
+- name: Update system dependencies
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Update system packages besides those excluded
+    dnf:
+      name: '*'
+      exclude:
+      - docker*
+      - kube*
+      update_only: yes
+      state: latest

@@ -1,0 +1,21 @@
+---
+- name: Update root user profile with KUBECONFIG
+  lineinfile:
+    path: ~/.bash_profile
+    line: 'export KUBECONFIG={{ kube_config_admin }}'
+    state: present
+
+- name: Create $HOME/.kube directory within Ansible user's profile
+  file:
+    path: '$HOME/.kube'
+    state: directory
+  become: no
+  register: kube_directory
+
+- name: Copy Kubernetes config to $HOME/.kube of Ansible user
+  copy:
+    src: '{{ kube_config_admin }}'
+    dest: '{{ kube_directory.path }}/config'
+    owner: '{{ kube_directory.uid }}'
+    group: '{{ kube_directory.gid }}'
+    remote_src: yes

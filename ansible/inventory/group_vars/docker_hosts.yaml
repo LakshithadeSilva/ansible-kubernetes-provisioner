@@ -1,0 +1,7 @@
+---
+docker_group: docker
+docker_version: 20.10.*
+docker_package_repository: https://download.docker.com/linux/centos/docker-ce.repo
+
+python_docker_modules:
+- docker

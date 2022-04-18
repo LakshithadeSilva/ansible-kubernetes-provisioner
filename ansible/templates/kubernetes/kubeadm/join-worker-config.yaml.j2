@@ -1,5 +1,5 @@
 ---
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: JoinConfiguration
 discovery:
   bootstrapToken:
@@ -10,5 +10,6 @@ discovery:
     unsafeSkipCAVerification: false
   timeout: 4m0s
 nodeRegistration:
-  name: {{ kube_join_name }}
-  criSocket: /var/run/dockershim.sock
+  name: {{ kube_node_registered_name }}
+  criSocket: {{ kube_node_cri_socket }}
+  imagePullPolicy: Always

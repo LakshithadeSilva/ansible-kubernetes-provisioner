@@ -1,0 +1,15 @@
+---
+- name: Install Linux dependencies
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Install required Linux package repos
+    dnf:
+      name: '{{ required_linux_repos }}'
+      state: present
+
+  - name: Install required Linux packages
+    dnf:
+      name: '{{ required_linux_packages }}'
+      state: present
