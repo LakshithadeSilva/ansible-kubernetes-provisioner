@@ -15,7 +15,6 @@ all:
           hosts:
             kube-worker1:
             kube-worker2:
-            kube-worker3:
 
     kube_proxy:
       hosts:
