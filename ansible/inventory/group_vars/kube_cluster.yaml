@@ -1,5 +1,5 @@
 ---
-containerd_version: 1.5.11
+containerd_version: 1.6.10
 containerd_package_repository: https://download.docker.com/linux/centos/docker-ce.repo
 
 etcd_image_tag: 3.5.1-0
