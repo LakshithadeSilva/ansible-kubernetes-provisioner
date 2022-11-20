@@ -46,7 +46,7 @@
 
   - name: Install Calico pod networking
     kubernetes.core.k8s:
-      template: templates/kubernetes/addons/calico-pod-network.yaml.j2
+      template: templates/kubernetes/addons/calico-onprem-pod-network.yaml.j2
       kubeconfig: '{{ kube_config_admin }}'
       state: present
 

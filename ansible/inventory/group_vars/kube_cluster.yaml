@@ -1,14 +1,14 @@
 ---
-containerd_version: 1.5.11
+containerd_version: 1.6.10
 containerd_package_repository: https://download.docker.com/linux/centos/docker-ce.repo
 
-etcd_image_tag: 3.5.1-0
+etcd_image_tag: 3.5.5-0
 etcd_image_repository: k8s.gcr.io
 
-coredns_image_tag: v1.8.6
+coredns_image_tag: v1.9.3
 coredns_image_repository: k8s.gcr.io/coredns
 
-kube_version: 1.23.4
+kube_version: 1.25.4
 kube_image_repository: k8s.gcr.io
 
 kube_cluster_name: KubernetesLab
@@ -44,7 +44,7 @@ kube_local_apiserver_bind_port: '{{ kube_control_pane_port }}'
 kube_local_apiserver_bind_address: '{{ ansible_default_ipv4.address }}'
 
 kube_node_registered_name: '{{ ansible_host }}'
-kube_node_cri_socket: /run/containerd/containerd.sock
+kube_node_cri_socket: unix:///run/containerd/containerd.sock
 
 python_kubernetes_modules:
 - kubernetes

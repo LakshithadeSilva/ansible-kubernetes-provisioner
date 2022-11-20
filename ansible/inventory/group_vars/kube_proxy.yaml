@@ -1,5 +1,5 @@
 ---
-envoy_version: v1.21-latest
+envoy_version: v1.24-latest
 envoy_container_image: 'envoyproxy/envoy:{{ envoy_version }}'
 envoy_container_name: envoy
 
